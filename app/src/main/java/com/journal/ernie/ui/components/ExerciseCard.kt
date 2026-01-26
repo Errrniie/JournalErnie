@@ -22,26 +22,27 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.journal.ernie.data.MuscleGroup
+import com.journal.ernie.data.Exercise
 
 @Composable
-fun MuscleGroupCard(
-    muscleGroup: MuscleGroup,
-    onAddExercise: () -> Unit,
-    onRemoveGroup: () -> Unit,
-    onAddSet: (String) -> Unit,  // exerciseId
-    onRemoveExercise: (String) -> Unit,  // exerciseId
+fun ExerciseCard(
+    exercise: Exercise,
+    onAddSet: () -> Unit,
+    onRemoveExercise: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        )
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             // Header row: Name and delete button
             Row(
@@ -50,54 +51,60 @@ fun MuscleGroupCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = muscleGroup.name,
-                    style = MaterialTheme.typography.headlineSmall,
+                    text = exercise.name,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.weight(1f)
                 )
                 IconButton(
-                    onClick = onRemoveGroup
+                    onClick = onRemoveExercise
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Delete,
-                        contentDescription = "Remove Muscle Group",
+                        contentDescription = "Remove Exercise",
                         tint = MaterialTheme.colorScheme.error
                     )
                 }
             }
             
-            // Exercises list
-            if (muscleGroup.exercises.isEmpty()) {
+            // Sets information
+            if (exercise.sets.isEmpty()) {
                 Text(
-                    text = "No exercises yet",
-                    style = MaterialTheme.typography.bodyMedium,
+                    text = "No sets yet",
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             } else {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    muscleGroup.exercises.forEach { exercise ->
-                        ExerciseCard(
-                            exercise = exercise,
-                            onAddSet = { onAddSet(exercise.id) },
-                            onRemoveExercise = { onRemoveExercise(exercise.id) }
+                Column {
+                    Text(
+                        text = "${exercise.sets.size} set${if (exercise.sets.size != 1) "s" else ""}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    )
+                    // Basic set info display (will be enhanced in Phase 8 with SetRow)
+                    exercise.sets.forEachIndexed { index, set ->
+                        Text(
+                            text = "Set ${index + 1}: ${set.reps} reps × ${set.weight}kg${if (set.comment != null) " - ${set.comment}" else ""}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(start = 8.dp, top = 2.dp)
                         )
                     }
                 }
             }
             
-            // Add exercise button
+            // Add set button
             OutlinedButton(
-                onClick = onAddExercise,
+                onClick = onAddSet,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Icon(
                     imageVector = Icons.Filled.Add,
-                    contentDescription = "Add Exercise"
+                    contentDescription = "Add Set"
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                Text("Add Exercise")
+                Text("Add Set")
             }
         }
     }

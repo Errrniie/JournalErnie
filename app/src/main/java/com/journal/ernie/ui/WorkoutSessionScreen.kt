@@ -32,6 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.journal.ernie.ui.components.MuscleGroupCard
 import com.journal.ernie.ui.components.TimerDisplay
+import com.journal.ernie.ui.dialogs.AddExerciseDialog
 import com.journal.ernie.ui.dialogs.AddMuscleGroupDialog
 import com.journal.ernie.viewmodel.WorkoutViewModel
 
@@ -45,8 +46,10 @@ fun WorkoutSessionScreen(
     val currentSession by viewModel.currentSession.collectAsState()
     val timerState by viewModel.timerState.collectAsState()
     
-    // Dialog state
+    // Dialog states
     var showAddMuscleGroupDialog by remember { mutableStateOf(false) }
+    var showAddExerciseDialog by remember { mutableStateOf(false) }
+    var selectedMuscleGroupId by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
         topBar = {
@@ -153,10 +156,17 @@ fun WorkoutSessionScreen(
                         MuscleGroupCard(
                             muscleGroup = muscleGroup,
                             onAddExercise = {
-                                // Will be implemented in Phase 7
+                                selectedMuscleGroupId = muscleGroup.id
+                                showAddExerciseDialog = true
                             },
                             onRemoveGroup = {
                                 viewModel.removeMuscleGroup(muscleGroup.id)
+                            },
+                            onAddSet = { exerciseId ->
+                                viewModel.addSet(muscleGroup.id, exerciseId)
+                            },
+                            onRemoveExercise = { exerciseId ->
+                                viewModel.removeExercise(muscleGroup.id, exerciseId)
                             }
                         )
                     }
@@ -172,6 +182,23 @@ fun WorkoutSessionScreen(
             onConfirm = { muscleGroupName ->
                 viewModel.addMuscleGroup(muscleGroupName)
                 showAddMuscleGroupDialog = false
+            }
+        )
+    }
+    
+    // Add exercise dialog
+    if (showAddExerciseDialog && selectedMuscleGroupId != null) {
+        AddExerciseDialog(
+            onDismiss = { 
+                showAddExerciseDialog = false
+                selectedMuscleGroupId = null
+            },
+            onConfirm = { exerciseName ->
+                selectedMuscleGroupId?.let { groupId ->
+                    viewModel.addExercise(groupId, exerciseName)
+                }
+                showAddExerciseDialog = false
+                selectedMuscleGroupId = null
             }
         )
     }
