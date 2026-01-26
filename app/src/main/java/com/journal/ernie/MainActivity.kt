@@ -11,7 +11,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.ViewModelProvider
 import com.journal.ernie.ui.AppNavigation
 import com.journal.ernie.viewmodel.WorkoutViewModel
 
@@ -22,6 +22,10 @@ sealed class Screen {
 }
 
 class MainActivity : ComponentActivity() {
+    private val workoutViewModel: WorkoutViewModel by lazy {
+        ViewModelProvider(this)[WorkoutViewModel::class.java]
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
@@ -34,9 +38,6 @@ class MainActivity : ComponentActivity() {
             val onNavigateTo: (Screen) -> Unit = { screen ->
                 currentScreen = screen
             }
-            
-            // Initialize ViewModel
-            val workoutViewModel: WorkoutViewModel = viewModel()
             
             // Material3 theme wrapper
             MaterialTheme {
