@@ -22,16 +22,16 @@ sealed class Screen {
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        
         setContent {
             // Navigation state - remembers current screen across recompositions
-            var currentScreen: Screen by remember { mutableStateOf(Screen.Home) }
-
+            var currentScreen by remember { mutableStateOf(Screen.Home) }
+            
             // Navigation callback - updates screen when called
             val onNavigateTo: (Screen) -> Unit = { screen ->
                 currentScreen = screen
             }
-
+            
             // Material3 theme wrapper
             MaterialTheme {
                 Surface(

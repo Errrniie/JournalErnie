@@ -15,13 +15,7 @@ fun AppNavigation(
 ) {
     when (currentScreen) {
         is Screen.Home -> {
-            // Placeholder - HomeScreen will be created in Phase 2
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("Home Screen")
-            }
+            HomeScreen(onNavigateTo = onNavigateTo)
         }
         is Screen.WorkoutList -> {
             // Placeholder - WorkoutListScreen will be created in Phase 4
