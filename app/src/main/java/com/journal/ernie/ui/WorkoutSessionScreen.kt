@@ -11,9 +11,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -23,12 +23,16 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.journal.ernie.data.MuscleGroup
+import com.journal.ernie.ui.components.MuscleGroupCard
 import com.journal.ernie.ui.components.TimerDisplay
+import com.journal.ernie.ui.dialogs.AddMuscleGroupDialog
 import com.journal.ernie.viewmodel.WorkoutViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -40,6 +44,9 @@ fun WorkoutSessionScreen(
     // Collect state from ViewModel
     val currentSession by viewModel.currentSession.collectAsState()
     val timerState by viewModel.timerState.collectAsState()
+    
+    // Dialog state
+    var showAddMuscleGroupDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -58,6 +65,16 @@ fun WorkoutSessionScreen(
                     }
                 }
             )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { showAddMuscleGroupDialog = true }
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = "Add Muscle Group"
+                )
+            }
         }
     ) { paddingValues ->
         val session = currentSession // Store in local variable for smart cast
@@ -123,7 +140,7 @@ fun WorkoutSessionScreen(
                                     fontWeight = FontWeight.Bold
                                 )
                                 Text(
-                                    text = "Add a muscle group to start tracking exercises",
+                                    text = "Tap the + button to add a muscle group",
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.padding(top = 8.dp)
@@ -133,48 +150,29 @@ fun WorkoutSessionScreen(
                     }
                 } else {
                     items(session.muscleGroups) { muscleGroup ->
-                        MuscleGroupCardBasic(muscleGroup = muscleGroup)
+                        MuscleGroupCard(
+                            muscleGroup = muscleGroup,
+                            onAddExercise = {
+                                // Will be implemented in Phase 7
+                            },
+                            onRemoveGroup = {
+                                viewModel.removeMuscleGroup(muscleGroup.id)
+                            }
+                        )
                     }
                 }
             }
         }
     }
-}
-
-// Basic muscle group card (will be enhanced in Phase 6)
-@Composable
-fun MuscleGroupCardBasic(muscleGroup: MuscleGroup) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 2.dp
-        )
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Text(
-                text = muscleGroup.name,
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
-            if (muscleGroup.exercises.isNotEmpty()) {
-                Text(
-                    text = "${muscleGroup.exercises.size} exercise${if (muscleGroup.exercises.size != 1) "s" else ""}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
-            } else {
-                Text(
-                    text = "No exercises yet",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
+    
+    // Add muscle group dialog
+    if (showAddMuscleGroupDialog) {
+        AddMuscleGroupDialog(
+            onDismiss = { showAddMuscleGroupDialog = false },
+            onConfirm = { muscleGroupName ->
+                viewModel.addMuscleGroup(muscleGroupName)
+                showAddMuscleGroupDialog = false
             }
-        }
+        )
     }
 }
