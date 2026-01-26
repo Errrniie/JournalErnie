@@ -27,13 +27,10 @@ fun AppNavigation(
             )
         }
         is Screen.WorkoutSession -> {
-            // Placeholder - WorkoutSessionScreen will be created in Phase 5
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("Workout Session Screen")
-            }
+            WorkoutSessionScreen(
+                viewModel = viewModel,
+                onNavigateBack = { onNavigateTo(Screen.WorkoutList) }
+            )
         }
     }
 }
