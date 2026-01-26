@@ -25,8 +25,9 @@ class MainActivity : ComponentActivity() {
         
         setContent {
             // Navigation state - remembers current screen across recompositions
-             
-            
+
+            var currentScreen: Screen by remember { mutableStateOf(Screen.Home)}
+
             // Navigation callback - updates screen when called
             val onNavigateTo: (Screen) -> Unit = { screen ->
                 currentScreen = screen
