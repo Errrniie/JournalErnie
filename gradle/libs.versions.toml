@@ -8,8 +8,7 @@ appcompat = "1.7.1"
 material = "1.13.0"
 composeBom = "2024.12.01"
 activityCompose = "1.9.2"
-kotlin = "1.9.24"
-composeCompiler = "1.5.15"
+kotlin = "2.0.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -28,5 +27,6 @@ androidx-activity-compose = { group = "androidx.activity", name = "activity-comp
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "composeCompiler" }
+org-jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+
