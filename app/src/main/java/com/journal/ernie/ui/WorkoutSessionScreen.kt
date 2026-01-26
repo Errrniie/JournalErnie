@@ -40,14 +40,14 @@ fun WorkoutSessionScreen(
     // Collect state from ViewModel
     val currentSession by viewModel.currentSession.collectAsState()
     val timerState by viewModel.timerState.collectAsState()
-    
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { 
+                title = {
                     Text(
                         text = currentSession?.name ?: "Workout Session"
-                    ) 
+                    )
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
@@ -60,7 +60,8 @@ fun WorkoutSessionScreen(
             )
         }
     ) { paddingValues ->
-        if (currentSession == null) {
+        val session = currentSession // Store in local variable for smart cast
+        if (session == null) {
             // No active session
             Box(
                 modifier = Modifier
@@ -104,9 +105,9 @@ fun WorkoutSessionScreen(
                         onReset = { viewModel.resetTimer() }
                     )
                 }
-                
+
                 // Muscle groups
-                if (currentSession.muscleGroups.isEmpty()) {
+                if (session.muscleGroups.isEmpty()) {
                     item {
                         Box(
                             modifier = Modifier.fillMaxWidth(),
@@ -131,7 +132,7 @@ fun WorkoutSessionScreen(
                         }
                     }
                 } else {
-                    items(currentSession.muscleGroups) { muscleGroup ->
+                    items(session.muscleGroups) { muscleGroup ->
                         MuscleGroupCardBasic(muscleGroup = muscleGroup)
                     }
                 }
