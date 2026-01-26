@@ -11,7 +11,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.journal.ernie.ui.AppNavigation
+import com.journal.ernie.viewmodel.WorkoutViewModel
 
 sealed class Screen {
     object Home : Screen()
@@ -33,6 +35,9 @@ class MainActivity : ComponentActivity() {
                 currentScreen = screen
             }
             
+            // Initialize ViewModel
+            val workoutViewModel: WorkoutViewModel = viewModel()
+            
             // Material3 theme wrapper
             MaterialTheme {
                 Surface(
@@ -41,7 +46,8 @@ class MainActivity : ComponentActivity() {
                     // Root navigation composable
                     AppNavigation(
                         currentScreen = currentScreen,
-                        onNavigateTo = onNavigateTo
+                        onNavigateTo = onNavigateTo,
+                        viewModel = workoutViewModel
                     )
                 }
             }
