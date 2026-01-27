@@ -35,6 +35,12 @@ fun AddMuscleGroupDialog(
 ) {
     var muscleGroupName by rememberSaveable { mutableStateOf("") }
     var showPresetDropdown by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    
+    val isValid = remember(muscleGroupName) {
+        val trimmed = muscleGroupName.trim()
+        trimmed.isNotEmpty() && trimmed.length <= 50
+    }
     
     // Get preset suggestions based on input
     val presetSuggestions = remember(muscleGroupName) {
@@ -71,11 +77,18 @@ fun AddMuscleGroupDialog(
                         onValueChange = { 
                             muscleGroupName = it
                             showPresetDropdown = it.isNotBlank() && presetSuggestions.isNotEmpty()
+                            errorMessage = when {
+                                it.trim().isEmpty() -> null // Don't show error while typing
+                                it.trim().length > 50 -> "Name must be 50 characters or less"
+                                else -> null
+                            }
                         },
                         label = { Text("Muscle Group Name") },
                         placeholder = { Text("e.g., Chest, Back, Legs") },
                         modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
+                        singleLine = true,
+                        isError = errorMessage != null,
+                        supportingText = { errorMessage?.let { Text(it) } }
                     )
                     
                     // Preset suggestions dropdown
@@ -128,12 +141,12 @@ fun AddMuscleGroupDialog(
                     Button(
                         onClick = {
                             val trimmedName = muscleGroupName.trim()
-                            if (trimmedName.isNotEmpty()) {
+                            if (trimmedName.isNotEmpty() && trimmedName.length <= 50) {
                                 onConfirm(trimmedName)
                                 onDismiss()
                             }
                         },
-                        enabled = muscleGroupName.trim().isNotEmpty()
+                        enabled = isValid
                     ) {
                         Text("Add")
                     }

@@ -41,6 +41,8 @@ fun SetRow(
     var repsText by remember { mutableStateOf(set.reps.toString()) }
     var weightText by remember { mutableStateOf(set.weight.toString()) }
     var commentText by remember { mutableStateOf(set.comment ?: "") }
+    var repsError by remember { mutableStateOf<String?>(null) }
+    var weightError by remember { mutableStateOf<String?>(null) }
     
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -73,8 +75,11 @@ fun SetRow(
                             // Save
                             val reps = repsText.toIntOrNull() ?: 0
                             val weight = weightText.toFloatOrNull() ?: 0f
-                            onUpdate(reps, weight, commentText.ifEmpty { null })
-                            isEditing = false
+                            // Validate before saving
+                            if (reps >= 0 && reps <= 1000 && weight >= 0f && weight <= 1000f) {
+                                onUpdate(reps, weight, commentText.ifEmpty { null })
+                                isEditing = false
+                            }
                         }) {
                             Text("Save")
                         }
@@ -83,6 +88,8 @@ fun SetRow(
                             repsText = set.reps.toString()
                             weightText = set.weight.toString()
                             commentText = set.comment ?: ""
+                            repsError = null
+                            weightError = null
                             isEditing = false
                         }) {
                             Text("Cancel")
@@ -109,23 +116,39 @@ fun SetRow(
                         value = repsText,
                         onValueChange = { 
                             if (it.isEmpty() || it.all { char -> char.isDigit() }) {
-                                repsText = it
+                                val value = it.toIntOrNull() ?: 0
+                                if (value <= 1000) {
+                                    repsText = it
+                                    repsError = null
+                                } else {
+                                    repsError = "Maximum 1000 reps"
+                                }
                             }
                         },
                         label = { Text("Reps") },
                         modifier = Modifier.weight(1f),
-                        singleLine = true
+                        singleLine = true,
+                        isError = repsError != null,
+                        supportingText = { repsError?.let { Text(it) } }
                     )
                     OutlinedTextField(
                         value = weightText,
                         onValueChange = { 
                             if (it.isEmpty() || it.matches(Regex("^\\d*\\.?\\d*$"))) {
-                                weightText = it
+                                val value = it.toFloatOrNull() ?: 0f
+                                if (value <= 1000f) {
+                                    weightText = it
+                                    weightError = null
+                                } else {
+                                    weightError = "Maximum 1000kg"
+                                }
                             }
                         },
                         label = { Text("Weight") },
                         modifier = Modifier.weight(1f),
-                        singleLine = true
+                        singleLine = true,
+                        isError = weightError != null,
+                        supportingText = { weightError?.let { Text(it) } }
                     )
                 }
                 

@@ -27,6 +27,12 @@ fun AddExerciseDialog(
     onConfirm: (String) -> Unit
 ) {
     var exerciseName by rememberSaveable { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    
+    val isValid = remember(exerciseName) {
+        val trimmed = exerciseName.trim()
+        trimmed.isNotEmpty() && trimmed.length <= 50
+    }
     
     Dialog(onDismissRequest = onDismiss) {
         Card(
@@ -50,11 +56,20 @@ fun AddExerciseDialog(
                 // Text field
                 OutlinedTextField(
                     value = exerciseName,
-                    onValueChange = { exerciseName = it },
+                    onValueChange = { 
+                        exerciseName = it
+                        errorMessage = when {
+                            it.trim().isEmpty() -> null // Don't show error while typing
+                            it.trim().length > 50 -> "Name must be 50 characters or less"
+                            else -> null
+                        }
+                    },
                     label = { Text("Exercise Name") },
                     placeholder = { Text("e.g., Bench Press, Squats") },
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
+                    isError = errorMessage != null,
+                    supportingText = { errorMessage?.let { Text(it) } }
                 )
                 
                 // Buttons
@@ -71,12 +86,12 @@ fun AddExerciseDialog(
                     Button(
                         onClick = {
                             val trimmedName = exerciseName.trim()
-                            if (trimmedName.isNotEmpty()) {
+                            if (trimmedName.isNotEmpty() && trimmedName.length <= 50) {
                                 onConfirm(trimmedName)
                                 onDismiss()
                             }
                         },
-                        enabled = exerciseName.trim().isNotEmpty()
+                        enabled = isValid
                     ) {
                         Text("Add")
                     }

@@ -32,6 +32,27 @@ class WorkoutViewModel : ViewModel() {
         loadSessions()
     }
     
+    // Validation Functions
+    
+    private fun validateSessionName(name: String): Boolean {
+        val trimmed = name.trim()
+        return trimmed.isNotEmpty() && trimmed.length <= 50
+    }
+    
+    private fun validateMuscleGroupName(name: String): Boolean {
+        val trimmed = name.trim()
+        return trimmed.isNotEmpty() && trimmed.length <= 50
+    }
+    
+    private fun validateExerciseName(name: String): Boolean {
+        val trimmed = name.trim()
+        return trimmed.isNotEmpty() && trimmed.length <= 50
+    }
+    
+    private fun validateSetData(reps: Int, weight: Float): Boolean {
+        return reps >= 0 && reps <= 1000 && weight >= 0f && weight <= 1000f
+    }
+    
     // Session Management Functions
     
     fun loadSessions() {
@@ -42,7 +63,10 @@ class WorkoutViewModel : ViewModel() {
     
     fun createNewSession(name: String) {
         viewModelScope.launch {
-            val newSession = WorkoutSession.createNew(name)
+            if (!validateSessionName(name)) {
+                return@launch
+            }
+            val newSession = WorkoutSession.createNew(name.trim())
             
             // Add to all sessions list
             _allSessions.update { currentList ->
@@ -85,8 +109,11 @@ class WorkoutViewModel : ViewModel() {
     fun addMuscleGroup(name: String) {
         viewModelScope.launch {
             val session = _currentSession.value ?: return@launch
+            if (!validateMuscleGroupName(name)) {
+                return@launch
+            }
             
-            val newGroup = MuscleGroup(name = name)
+            val newGroup = MuscleGroup(name = name.trim())
             session.addMuscleGroup(newGroup)
             
             // Update current session
@@ -129,8 +156,11 @@ class WorkoutViewModel : ViewModel() {
         viewModelScope.launch {
             val session = _currentSession.value ?: return@launch
             val group = session.findMuscleGroupById(groupId) ?: return@launch
+            if (!validateExerciseName(exerciseName)) {
+                return@launch
+            }
             
-            val newExercise = Exercise(name = exerciseName)
+            val newExercise = Exercise(name = exerciseName.trim())
             group.addExercise(newExercise)
             
             // Update current session
@@ -227,6 +257,11 @@ class WorkoutViewModel : ViewModel() {
             
             // Validate index
             if (setIndex !in exercise.sets.indices) return@launch
+            
+            // Validate set data
+            if (!validateSetData(reps, weight)) {
+                return@launch
+            }
             
             // Update set
             val set = exercise.sets[setIndex]

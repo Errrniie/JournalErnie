@@ -27,6 +27,12 @@ fun CreateSessionDialog(
     onConfirm: (String) -> Unit
 ) {
     var sessionName by rememberSaveable { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    
+    val isValid = remember(sessionName) {
+        val trimmed = sessionName.trim()
+        trimmed.isNotEmpty() && trimmed.length <= 50
+    }
     
     Dialog(onDismissRequest = onDismiss) {
         Card(
@@ -50,11 +56,20 @@ fun CreateSessionDialog(
                 // Text field
                 OutlinedTextField(
                     value = sessionName,
-                    onValueChange = { sessionName = it },
+                    onValueChange = { 
+                        sessionName = it
+                        errorMessage = when {
+                            it.trim().isEmpty() -> null // Don't show error while typing
+                            it.trim().length > 50 -> "Name must be 50 characters or less"
+                            else -> null
+                        }
+                    },
                     label = { Text("Session Name") },
                     placeholder = { Text("e.g., Morning Workout, Leg Day") },
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
+                    isError = errorMessage != null,
+                    supportingText = { errorMessage?.let { Text(it) } }
                 )
                 
                 // Buttons
@@ -71,12 +86,12 @@ fun CreateSessionDialog(
                     Button(
                         onClick = {
                             val trimmedName = sessionName.trim()
-                            if (trimmedName.isNotEmpty()) {
+                            if (trimmedName.isNotEmpty() && trimmedName.length <= 50) {
                                 onConfirm(trimmedName)
                                 onDismiss()
                             }
                         },
-                        enabled = sessionName.trim().isNotEmpty()
+                        enabled = isValid
                     ) {
                         Text("Create")
                     }
