@@ -26,12 +26,16 @@ import com.journal.ernie.Screen
 fun HomeScreen(
     onNavigateTo: (Screen) -> Unit
 ) {
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        contentAlignment = Alignment.Center
     ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
         // First row: 2 placeholder boxes
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -96,6 +100,7 @@ fun HomeScreen(
                     .weight(1f)
                     .height(150.dp)
             )
+        }
         }
     }
 }

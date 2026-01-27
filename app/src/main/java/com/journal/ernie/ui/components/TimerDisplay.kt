@@ -40,19 +40,24 @@ fun TimerDisplay(
     onReset: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Local state for smooth animation
+    // Local state for real-time display
     var displayTime by remember { mutableStateOf(elapsedTimeSeconds) }
     
-    // Update display time smoothly when running
+    // Update display time in real-time when running, sync when paused/reset
     LaunchedEffect(isRunning, elapsedTimeSeconds) {
         if (isRunning) {
-            // Smooth increment every second
-            while (true) {
+            // Start from current elapsedTimeSeconds for accurate base time
+            var localTime = elapsedTimeSeconds
+            displayTime = localTime
+            
+            // Increment locally every second for smooth real-time updates
+            while (isRunning) {
                 delay(1000)
-                displayTime = elapsedTimeSeconds
+                localTime++
+                displayTime = localTime
             }
         } else {
-            // Sync with actual time when paused
+            // When paused or reset, sync with ViewModel value
             displayTime = elapsedTimeSeconds
         }
     }
