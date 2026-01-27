@@ -31,6 +31,8 @@ fun MuscleGroupCard(
     onRemoveGroup: () -> Unit,
     onAddSet: (String) -> Unit,  // exerciseId
     onRemoveExercise: (String) -> Unit,  // exerciseId
+    onUpdateSet: (String, Int, Int, Float, String?) -> Unit,  // exerciseId, setIndex, reps, weight, comment
+    onRemoveSet: (String, Int) -> Unit,  // exerciseId, setIndex
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -81,7 +83,13 @@ fun MuscleGroupCard(
                         ExerciseCard(
                             exercise = exercise,
                             onAddSet = { onAddSet(exercise.id) },
-                            onRemoveExercise = { onRemoveExercise(exercise.id) }
+                            onRemoveExercise = { onRemoveExercise(exercise.id) },
+                            onUpdateSet = { setIndex, reps, weight, comment ->
+                                onUpdateSet(exercise.id, setIndex, reps, weight, comment)
+                            },
+                            onRemoveSet = { setIndex ->
+                                onRemoveSet(exercise.id, setIndex)
+                            }
                         )
                     }
                 }

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.spacedBy
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -29,6 +30,8 @@ fun ExerciseCard(
     exercise: Exercise,
     onAddSet: () -> Unit,
     onRemoveExercise: () -> Unit,
+    onUpdateSet: (Int, Int, Float, String?) -> Unit,  // setIndex, reps, weight, comment
+    onRemoveSet: (Int) -> Unit,  // setIndex
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -67,7 +70,7 @@ fun ExerciseCard(
                 }
             }
             
-            // Sets information
+            // Sets list
             if (exercise.sets.isEmpty()) {
                 Text(
                     text = "No sets yet",
@@ -75,20 +78,19 @@ fun ExerciseCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             } else {
-                Column {
-                    Text(
-                        text = "${exercise.sets.size} set${if (exercise.sets.size != 1) "s" else ""}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(bottom = 4.dp)
-                    )
-                    // Basic set info display (will be enhanced in Phase 8 with SetRow)
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
                     exercise.sets.forEachIndexed { index, set ->
-                        Text(
-                            text = "Set ${index + 1}: ${set.reps} reps × ${set.weight}kg${if (set.comment != null) " - ${set.comment}" else ""}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(start = 8.dp, top = 2.dp)
+                        SetRow(
+                            set = set,
+                            setNumber = index + 1,
+                            onUpdate = { reps, weight, comment ->
+                                onUpdateSet(index, reps, weight, comment)
+                            },
+                            onDelete = {
+                                onRemoveSet(index)
+                            }
                         )
                     }
                 }

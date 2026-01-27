@@ -167,6 +167,12 @@ fun WorkoutSessionScreen(
                             },
                             onRemoveExercise = { exerciseId ->
                                 viewModel.removeExercise(muscleGroup.id, exerciseId)
+                            },
+                            onUpdateSet = { exerciseId, setIndex, reps, weight, comment ->
+                                viewModel.updateSet(muscleGroup.id, exerciseId, setIndex, reps, weight, comment)
+                            },
+                            onRemoveSet = { exerciseId, setIndex ->
+                                viewModel.removeSet(muscleGroup.id, exerciseId, setIndex)
                             }
                         )
                     }
