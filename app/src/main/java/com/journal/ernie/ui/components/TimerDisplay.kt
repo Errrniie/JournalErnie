@@ -43,21 +43,32 @@ fun TimerDisplay(
     // Local state for real-time display
     var displayTime by remember { mutableStateOf(elapsedTimeSeconds) }
     
-    // Update display time in real-time when running, sync when paused/reset
-    LaunchedEffect(isRunning, elapsedTimeSeconds) {
+    // Sync with ViewModel when not running (for reset functionality)
+    // This LaunchedEffect runs when elapsedTimeSeconds changes while not running
+    LaunchedEffect(elapsedTimeSeconds) {
+        if (!isRunning) {
+            displayTime = elapsedTimeSeconds
+        }
+    }
+    
+    // Handle running state: start local increment or sync when pausing
+    // This LaunchedEffect restarts only when isRunning changes
+    LaunchedEffect(isRunning) {
         if (isRunning) {
-            // Start from current elapsedTimeSeconds for accurate base time
+            // When starting: capture current elapsedTimeSeconds and start local increment
             var localTime = elapsedTimeSeconds
             displayTime = localTime
             
             // Increment locally every second for smooth real-time updates
-            while (isRunning) {
+            // When isRunning becomes false, this LaunchedEffect will be cancelled
+            // and the coroutine will stop, so the loop will exit
+            while (true) {
                 delay(1000)
                 localTime++
                 displayTime = localTime
             }
         } else {
-            // When paused or reset, sync with ViewModel value
+            // When pausing: immediately sync with ViewModel value
             displayTime = elapsedTimeSeconds
         }
     }
