@@ -181,9 +181,10 @@ fun SetRow(
                         text = "${set.reps} reps × ${set.weight}kg",
                         style = MaterialTheme.typography.bodyMedium
                     )
-                    if (set.comment != null && set.comment.isNotEmpty()) {
+                    val comment = set.comment
+                    if (comment != null && comment.isNotEmpty()) {
                         Text(
-                            text = set.comment,
+                            text = comment,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(top = 2.dp)

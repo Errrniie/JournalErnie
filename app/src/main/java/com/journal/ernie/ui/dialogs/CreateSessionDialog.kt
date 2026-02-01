@@ -14,6 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -69,7 +70,12 @@ fun CreateSessionDialog(
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     isError = errorMessage != null,
-                    supportingText = { errorMessage?.let { Text(it) } }
+                    supportingText = {
+                        val msg = errorMessage
+                        if (msg != null) {
+                            Text(msg)
+                        }
+                    }
                 )
                 
                 // Buttons

@@ -88,7 +88,12 @@ fun AddMuscleGroupDialog(
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
                         isError = errorMessage != null,
-                        supportingText = { errorMessage?.let { Text(it) } }
+                        supportingText = {
+                            val msg = errorMessage
+                            if (msg != null) {
+                                Text(msg)
+                            }
+                        }
                     )
                     
                     // Preset suggestions dropdown
