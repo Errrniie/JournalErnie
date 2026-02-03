@@ -1,5 +1,6 @@
 package com.journal.ernie.ui
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -47,9 +48,12 @@ fun WorkoutSessionScreen(
     viewModel: WorkoutViewModel,
     onNavigateBack: () -> Unit
 ) {
-    // Collect state from ViewModel
-    val currentSession by viewModel.currentSession.collectAsState()
+    // Read state from ViewModel (State for reliable recomposition)
+    val currentSession by viewModel.currentSession
     val timerState by viewModel.timerState.collectAsState()
+
+    // Debug: log muscle groups count to verify UI receives updates
+    Log.d("WorkoutVM", "WorkoutSessionScreen recompose: muscleGroups.size=${currentSession?.muscleGroups?.size ?: "null"}")
     
     // Dialog states
     var showAddMuscleGroupDialog by remember { mutableStateOf(false) }
@@ -165,7 +169,10 @@ fun WorkoutSessionScreen(
                         }
                     }
                 } else {
-                    items(session.muscleGroups) { muscleGroup ->
+                    items(
+                        items = session.muscleGroups,
+                        key = { it.id }
+                    ) { muscleGroup ->
                         MuscleGroupCard(
                             muscleGroup = muscleGroup,
                             onAddExercise = {

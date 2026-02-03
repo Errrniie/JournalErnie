@@ -1,6 +1,10 @@
 package com.journal.ernie.viewmodel
 
 // Android
+import android.util.Log
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.State
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 
@@ -27,8 +31,10 @@ import com.journal.ernie.data.WorkoutSession
  * changes but does not persist across app restarts (Room integration pending).
  */
 class WorkoutViewModel : ViewModel() {
-    // Private mutable state flows
-    private val _currentSession = MutableStateFlow<WorkoutSession?>(null)
+    // Private mutable state - use mutableStateOf for currentSession so Compose
+    // reliably recomposes when it changes (StateFlow + collectAsState was not
+    // triggering updates in some cases, e.g. after dialog dismiss)
+    private val _currentSession: MutableState<WorkoutSession?> = mutableStateOf(null)
     private val _allSessions = MutableStateFlow<List<WorkoutSession>>(emptyList())
     private val _timerState = MutableStateFlow<TimerState>(TimerState.initial())
 
@@ -37,8 +43,9 @@ class WorkoutViewModel : ViewModel() {
 
     /**
      * The currently active workout session, or null if no session is selected.
+     * Uses Compose State for reliable UI updates.
      */
-    val currentSession: StateFlow<WorkoutSession?> = _currentSession.asStateFlow()
+    val currentSession: State<WorkoutSession?> = _currentSession
 
     /**
      * List of all workout sessions created by the user.
@@ -113,26 +120,17 @@ class WorkoutViewModel : ViewModel() {
      *
      * @param name The name of the workout session. Must be non-empty and 50 characters or less.
      */
+    /**
+     * Creates a new workout session. Runs synchronously so callers can navigate
+     * after this returns, with the session already set.
+     */
     fun createNewSession(name: String) {
-        viewModelScope.launch {
-            if (!validateSessionName(name)) {
-                return@launch
-            }
-            val newSession = WorkoutSession.createNew(name.trim())
+        if (!validateSessionName(name)) return
+        val newSession = WorkoutSession.createNew(name.trim())
 
-            // Add to all sessions list
-            _allSessions.update { currentList ->
-                currentList + newSession
-            }
-
-            // Set as current session
-            _currentSession.value = newSession
-
-            // Reset timer
-            _timerState.value = TimerState.initial()
-
-            // TODO: Save to Room database when implemented
-        }
+        _allSessions.update { currentList -> currentList + newSession }
+        _currentSession.value = newSession
+        _timerState.value = TimerState.initial()
     }
 
     /**
@@ -144,20 +142,13 @@ class WorkoutViewModel : ViewModel() {
      *
      * @param id The unique identifier of the session to select.
      */
+    /**
+     * Selects a workout session. Runs synchronously so callers can navigate
+     * after this returns, with the session already set.
+     */
     fun selectSession(id: String) {
-        viewModelScope.launch {
-            val session = _allSessions.value.find { it.id == id }
-
-            if (session != null) {
-                _currentSession.value = session
-                // Timer is NOT reset here - persists when navigating back
-            } else {
-                // Session not found - could log error or handle gracefully
-                _currentSession.value = null
-            }
-
-            // TODO: Load full session data from Room database when implemented
-        }
+        val session = _allSessions.value.find { it.id == id }
+        _currentSession.value = if (session != null) session else null
     }
 
     /**
@@ -185,22 +176,22 @@ class WorkoutViewModel : ViewModel() {
      * @param name The name of the muscle group. Must be non-empty and 50 characters or less.
      */
     fun addMuscleGroup(name: String) {
-        viewModelScope.launch {
-            val session = _currentSession.value ?: return@launch
-            if (!validateMuscleGroupName(name)) {
-                return@launch
-            }
+        val session = _currentSession.value ?: run {
+            Log.d("WorkoutVM", "addMuscleGroup: no current session, ignoring")
+            return
+        }
+        if (!validateMuscleGroupName(name)) return
 
-            val newGroup = MuscleGroup(name = name.trim())
-            session.addMuscleGroup(newGroup)
+        Log.d("WorkoutVM", "addMuscleGroup: before add, muscleGroups.size=${session.muscleGroups.size}")
+        val newGroup = MuscleGroup(name = name.trim())
+        session.addMuscleGroup(newGroup)
+        Log.d("WorkoutVM", "addMuscleGroup: after add, muscleGroups.size=${session.muscleGroups.size}")
 
-            val updatedSession = session.emitCopy()
-            _currentSession.value = updatedSession
-            _allSessions.update { sessions ->
-                sessions.map { if (it.id == session.id) updatedSession else it }
-            }
-
-            // TODO: Save to Room database when implemented
+        val updatedSession = session.emitCopy()
+        _currentSession.value = updatedSession
+        Log.d("WorkoutVM", "addMuscleGroup: emitted updatedSession, muscleGroups.size=${updatedSession.muscleGroups.size}")
+        _allSessions.update { sessions ->
+            sessions.map { if (it.id == session.id) updatedSession else it }
         }
     }
 
